@@ -1,0 +1,39 @@
+name: Publish PyGreSQL documentation
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Check out docs
+        uses: actions/checkout@v3
+        with:
+          repository: "PyGreSQL"
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.11
+      - name: Install dependencies
+        run: |
+          sudo apt install libpq-dev
+          python -m pip install --upgrade pip
+          pip install .
+          pip install "sphinx>=7,<8"
+      - name: Create docs with Sphinx
+        run: |
+          cd docs
+          make html
+      - name: Deploy docs to GitHub pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: docs/_build/html
+          cname: pygresql.org
+          enable_jekyll: false
+          force_orphan: true
